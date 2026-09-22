@@ -200,8 +200,20 @@ def select_threshold(
 
     Points the objective scores as None are skipped (undefined metric, or
     a constraint the caller rejected). Returns None if none survive.
-    Ties go to the HIGHER threshold, which is the cheaper end: same
-    routing quality, fewer tool calls.
+
+    Ties go to the HIGHER threshold -- note which direction that is.
+    TOOL is chosen when ``confidence < threshold``, so raising the cut
+    escalates MORE tasks, not fewer: the higher end is the tool-happy,
+    more expensive one. It wins ties anyway, because this project treats
+    a confident-and-wrong direct answer as costlier than a needless tool
+    call, and on a tied plateau the observed routing is usually identical
+    -- the choice only bites on unseen data, where the higher cut
+    escalates more readily.
+
+    ponytail: picking either edge of a tied plateau is fragile, since the
+    edge sits exactly where a task flips. The midpoint of the plateau
+    would maximize margin against distribution shift; worth doing if the
+    selected threshold turns out to be sensitive across pilot runs.
     """
     score = (lambda p: p.f1) if objective == "f1" else objective
     if not callable(score):
