@@ -62,17 +62,24 @@ class HumanEvalLoader(DatasetLoader):
         items: List[TaskItem] = []
         for row in rows:
             task_id = row.get("task_id", "")
-            prompt = row.get("prompt", "").strip()
+            # NOT .strip(). A HumanEval prompt ends on the docstring's
+            # closing quotes plus a newline, and completions are bare
+            # function bodies meant to be appended straight on. Stripping
+            # that newline fuses the first line of the body onto the """
+            # and every one of the 164 tasks becomes a SyntaxError --
+            # which reads as a model that cannot write Python, not as a
+            # loader bug. Measured: 4/164 with the strip, 164/164 without.
+            prompt = row.get("prompt", "")
             canonical_solution = row.get("canonical_solution", "")
             test_code = row.get("test", "")
             entry_point = row.get("entry_point", "")
 
-            if not prompt or not task_id:
-                continue
+            if not prompt.strip() or not task_id:
+                continue   # guard on a stripped copy, store the original
 
             items.append(TaskItem(
                 task_id=task_id.replace("/", "_"),
-                query=f"Complete the following Python function:\n\n{prompt}",
+                query=f"Complete the following Python function:\n\n{prompt.strip()}",
                 gold_answer=canonical_solution.strip(),
                 dataset="humaneval",
                 tool_type="code_executor",

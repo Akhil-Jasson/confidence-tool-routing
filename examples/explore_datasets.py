@@ -34,7 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from datasets import load_dataset, list_datasets, TaskItem
+from task_datasets import load_dataset, list_datasets, TaskItem
 
 
 def _trunc(text: str, width: int = 120) -> str:

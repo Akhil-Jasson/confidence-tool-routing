@@ -11,8 +11,15 @@ Source: AiresPucrs/News-Category-Dataset on HuggingFace
 categories (U.S. NEWS, POLITICS, ENTERTAINMENT, SPORTS, etc.).
 
 Task: classify the headline into its category.
-Tool type: none / web_search — most headlines are classifiable from
-    the text alone; the LLM's parametric knowledge suffices.
+Tool type: none — headlines are classifiable from the text alone.
+
+NOT part of the core task set. Its role is the negative control: every
+task here should be answered directly, so it measures the
+unnecessary-call rate on its own, with no correct escalations mixed in
+to mask it. A router that escalates here is burning money outright.
+
+Keep that role in mind before reading more into it — it exercises no
+tool and contributes nothing to the cross-tool transfer comparison.
 
 The HuggingFace datasets-server rows API returns JSON over HTTP and
 requires no authentication or extra dependencies.

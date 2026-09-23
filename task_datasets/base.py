@@ -35,6 +35,21 @@ class TaskItem(TypedDict, total=False):
     gold_answer: str
     dataset: str
     tool_type: str          # none | retrieval | calculator | code_executor | web_search
+
+    # WHICH tool a task would use (tool_type) is a property of the
+    # dataset. WHETHER it needs one at all is not, and metrics.py grades
+    # routing against this field, not tool_type: precision, recall,
+    # unnecessary-call rate and missed-call rate all key off it, and
+    # return nothing usable without it.
+    #
+    # Loaders deliberately leave it unset. It is model-relative -- a task
+    # gpt-oss-120b answers from memory may genuinely need a calculator
+    # for a smaller model -- so it is labelled empirically by a pilot
+    # run on a held-out split, not asserted by whoever wrote the loader.
+    # Unset reads as "not_required" downstream, which is why the pilot
+    # has to run before any routing number is believable.
+    tool_necessity: str     # required | not_required | ambiguous
+
     meta: Dict[str, Any]
 
 
